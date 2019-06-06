@@ -4,34 +4,34 @@ void printErrorMessage(uint8_t e, bool eol = true)
 {
   switch (e) {
   case IniFile::errorNoError:
-    Serial.print("OK");
+    Serial.print(" ");
     break;
   case IniFile::errorFileNotFound:
-    Serial.print("ARCHIVO NO ENCONTRADO");
+    Serial.print(" ");
     break;
   case IniFile::errorFileNotOpen:
-    Serial.print("ARCHIVO NO ABIERTO");
+    Serial.print(" ");
     break;
   case IniFile::errorBufferTooSmall:
-    Serial.print("BUFFER PEQUEÑO");
+    Serial.print(" ");
     break;
   case IniFile::errorSeekError:
-    Serial.print("BUSCAR ERROR");
+    Serial.print(" ");
     break;
   case IniFile::errorSectionNotFound:
-    Serial.print("SECCION NO ENCONTRADA");
+    Serial.print(" ");
     break;
   case IniFile::errorKeyNotFound:
-    Serial.print("CONTRASEÑA NO ENCONTRADA");
+    Serial.print(" ");
     break;
   case IniFile::errorEndOfFile:
-    Serial.print("FIN DE ARCHIVO");
+    Serial.print(" ");
     break;
   case IniFile::errorUnknownError:
-    Serial.print("ERROR DESCONOCIDO");
+    Serial.print(" ");
     break;
   default:
-    Serial.print("VALOR ERROR DESCONOCIDO");
+    Serial.print(" ");
     break;
   }
   if (eol)
@@ -48,7 +48,7 @@ void readConfiguration(char *iniFilename, tConfig *cfg) {
     Serial.print("ARCHIVO INI ");
     Serial.print(iniFilename);
     Serial.println(" NO EXISTE");
-    M5.Lcd.println("SIN ARCHIVO INI");
+    M5.Lcd.println("<-------                                            Presionar boton rojo RESETError de lectura          del archivo INI           ");
     // Cannot do anything else
     while (1)
       ;
@@ -70,12 +70,12 @@ void readConfiguration(char *iniFilename, tConfig *cfg) {
   
   // Fetch a value from a key which is present
   if (ini.getValue("config", "nightscout", buffer, bufferLen)) {
-    Serial.print("section 'config' has an entry 'nightscout' with value ");
+    Serial.print(" ");
     Serial.println(buffer);
     strlcpy(cfg->url, buffer, 64);
   }
   else {
-    Serial.print("Could not read 'nightscout' from section 'config', error was ");
+    Serial.print(" ");
     printErrorMessage(ini.getError());
     M5.Lcd.println("FALTA URL EN ARCHIVO INI");
     while (1)

@@ -1,5 +1,7 @@
 /*  M5Stack Nightscout monitor
     Copyright (C) 2018, 2019 Martin Lukasek <martin@lukasek.cz>
+
+    CUSTOMIZED VERSION WITH BIGGER TIME AGO, DELTA, CLOCK. NO STARTUP MUSIC. NO BACKGROUND NOISE. SMALLER ARROW. SNOOZE BAR DIFFERENT LOCATION. 
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,11 +19,8 @@
     This software uses some 3rd party libraries:
     IniFile by Steve Marple <stevemarple@googlemail.com> (GNU LGPL v2.1)
     ArduinoJson by Benoit BLANCHON (MIT License) 
+    IoT Icon Set by Artur Funk (GPL v3)
 */
-
-
-
-
 
 
 #include <M5Stack.h>
@@ -46,10 +45,20 @@ extern const unsigned char alarmSndData[];
 extern const unsigned char sun_icon16x16[];
 // extern const unsigned char siren_icon16x16[];
 extern const unsigned char powerbutton_icon16x16[];
+extern const unsigned char plug_icon16x16[];
+extern const unsigned char timer_icon16x16[];
+extern const unsigned char powerbutton_icon16x16[];
+extern const unsigned char bat0_icon16x16[];
+extern const unsigned char bat1_icon16x16[];
+extern const unsigned char bat2_icon16x16[];
+extern const unsigned char bat3_icon16x16[];
+extern const unsigned char bat4_icon16x16[];
+extern const unsigned char plug_icon16x16[];
 
 const char* ntpServer = "pool.ntp.org";
 struct tm localTimeInfo;
 int lastSec = 61;
+int lastMin = 61;
 char localTimeStr[30];
 
 #ifndef min
@@ -73,15 +82,15 @@ void startupLogo() {
     M5.Lcd.setBrightness(0);
     if(cfg.bootPic[0]==0) {
       // M5.Lcd.pushImage(0, 0, 320, 240, (uint16_t *)gImage_logoM5);
-      M5.Lcd.drawString("M5 Stack", 120, 60, GFXFF);
-      M5.Lcd.drawString("Nightscout monitor", 60, 80, GFXFF);
-      M5.Lcd.drawString("(c) 2019 Martin Lukasek", 20, 120, GFXFF);
+      // M5.Lcd.drawString("M5 Stack", 120, 60, GFXFF);
+      // M5.Lcd.drawString("Nightscout monitor", 60, 80, GFXFF);
+      // M5.Lcd.drawString("(c) 2019 Martin Lukasek", 20, 120, GFXFF);
     } else {
       M5.Lcd.drawJpgFile(SD, cfg.bootPic);
     }
     M5.Lcd.setBrightness(100);
     M5.update();
-    M5.Speaker.playMusic(m5stack_startup_music,25000);
+//    M5.Speaker.playMusic(m5stack_startup_music,25000);              // INTRO MUSIC
     delay(1000);
     M5.Lcd.fillScreen(BLACK);
     delay(800);
@@ -170,7 +179,7 @@ void buttons_test() {
   if(M5.BtnA.wasPressed()) {
       // M5.Lcd.printf("A");
       Serial.printf("A");
-       play_tone(1000, 10, 1);
+//       play_tone(1000, 10, 1);
       // sndAlarm();
       if(lcdBrightness==cfg.brightness1) 
         lcdBrightness = cfg.brightness2;
@@ -184,7 +193,7 @@ void buttons_test() {
   if(M5.BtnB.wasPressed()) {
       // M5.Lcd.printf("B");
       Serial.printf("B");
-       play_tone(1000, 10, 1);
+//       play_tone(1000, 10, 1);
       struct tm timeinfo;
       if(!getLocalTime(&timeinfo)){
         lastSnoozeTime=0;
@@ -204,7 +213,7 @@ void buttons_test() {
   if(M5.BtnC.wasPressed()) {
       // M5.Lcd.printf("C");
       Serial.printf("C");
-       play_tone(1000, 10, 1);
+//       play_tone(1000, 10, 1);
       M5.setWakeupButton(BUTTON_B_PIN);
       M5.powerOFF();
 
@@ -269,8 +278,9 @@ int8_t getBatteryLevel()                    // battery
   Wire.beginTransmission(0x75);
   Wire.write(0x78);
   if (Wire.endTransmission(false) == 0
-      && Wire.requestFrom(0x75, 1)) {
-    switch (Wire.read() & 0xF0) {
+   && Wire.requestFrom(0x75, 1)) {
+    int8_t bdata=Wire.read();
+     switch (bdata & 0xF0) {
       case 0xE0: return 25;
       case 0xC0: return 50;
       case 0x80: return 75;
@@ -279,6 +289,7 @@ int8_t getBatteryLevel()                    // battery
     }
   }
   return -1;
+//  drawIcon(153, 220, (uint8_t*)plug_icon16x16, TFT_DARKGREY);
 }
 
 
@@ -500,7 +511,7 @@ void update_glycemia() {
 
     HTTPClient http;
 
-    Serial.print("[HTTP] begin...\n");
+    Serial.print(" ");
     // configure target server and url
     char NSurl[128];
     strcpy(NSurl,"https://");
@@ -509,14 +520,14 @@ void update_glycemia() {
     // more info at /api/v2/properties
     http.begin(NSurl); //HTTP
     
-    Serial.print("[HTTP] GET...\n");
+    Serial.print(" ");
     // start connection and send HTTP header
     int httpCode = http.GET();
   
     // httpCode will be negative on error
     if(httpCode > 0) {
       // HTTP header has been send and Server response header has been handled
-      Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+      Serial.printf(" ");
 
       // file found at server
       if(httpCode == HTTP_CODE_OK) {
@@ -528,10 +539,10 @@ void update_glycemia() {
         Serial.print("Free Heap = "); Serial.println(ESP.getFreeHeap());
         auto JSONerr = deserializeJson(JSONdoc, json);
         if (JSONerr) {   //Check for errors in parsing
-          Serial.println("JSON parsing failed");
+          Serial.println(" ");
           M5.Lcd.setFreeFont(FSSB12);
           M5.Lcd.setTextColor(TFT_WHITE, TFT_BLACK);
-          M5.Lcd.drawString("JSON parsing failed", 0, 0, GFXFF);
+          M5.Lcd.drawString(" ", 0, 0, GFXFF);
           wasError = 1;
         } else {
           char sensDev[64];
@@ -609,10 +620,10 @@ void update_glycemia() {
               String propjson = http.getString();
               const size_t propcapacity = 16500;
               DynamicJsonDocument propdoc(propcapacity);
-              Serial.println("Zalozen druhy JSON");
+              Serial.println(" ");
               auto propJSONerr = deserializeJson(propdoc, propjson);
               if(propJSONerr) {
-                Serial.println("Properties JSON parsing failed");
+                Serial.println(" ");
                 M5.Lcd.fillRect(130,24,69,23,TFT_BLACK);
                 M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
                 M5.Lcd.drawString("???", 130, 24, GFXFF);
@@ -874,8 +885,7 @@ void update_glycemia() {
 
 
 
-
-          // ARROW SECTION
+// ARROW SECTION
 
 
 //          uint16_t glColor = TFT_GREEN;
@@ -900,7 +910,7 @@ void update_glycemia() {
             arrowAngle = 180;
           if (arrowAngle != 180)
 //            drawArrow(0 + tw + 25, 125 + 40, 10, arrowAngle + 85, 40, 40, glColor);      //  (x+tw+25, y+40, ...)
-            drawArrow(120, 95, 20, arrowAngle + 85, 40, 40, glColor);      //  (x, y, round, ...)
+            drawArrow(120, 95, 20, arrowAngle + 85, 30, 30, glColor);      //  (x, y, round, angle, width, height, color...)
 
           //drawArrow(0+tw+40, 120+40, 10, 45+85, 40, 40, TFT_RED);
           //drawArrow(0+tw+40, 120+40, 10, -45+85, 40, 40, TFT_BLUE);
@@ -1067,33 +1077,70 @@ void update_glycemia() {
                       case 1: // button function icons
                         // M5.Lcd.drawBitmap(50, 224, 16, 16, (uint8_t*)home_icon16x16);
                         // M5.Lcd.pushImage(50, 224, 16, 16, (uint8_t*)home_icon16x16);
-                        drawIcon(58, 220, (uint8_t*)sun_icon16x16, TFT_DARKGREY);
+                        drawIcon(58, 220, (uint8_t*)sun_icon16x16, TFT_LIGHTGREY);
 //                        drawIcon(153, 220, (uint8_t*)siren_icon16x16, TFT_DARKGREY);
                         
+
+
+
+
 //        BATTERY SECTION
 
+
+          int8_t battLevel = getBatteryLevel();
+          Serial.print("Battery level: "); Serial.println(battLevel);
+          // sprintf(tmpstr, "%d", battLevel);
+          // M5.Lcd.drawString(tmpstr, 0, 220, GFXFF);
+          M5.Lcd.fillRoundRect(120, 220, 60, 15, 0, TFT_BLACK);             // MASK RECTANGLE BATTERY ICON
+
+
+          if(battLevel!=-1) {
+              switch(battLevel) {
+              case 0:
+                drawIcon(150, 220, (uint8_t*)bat0_icon16x16, TFT_RED);
+                break;
+              case 25:
+                drawIcon(150, 220, (uint8_t*)bat1_icon16x16, TFT_ORANGE);
+                break;
+              case 50:
+                drawIcon(150, 220, (uint8_t*)bat2_icon16x16, TFT_LIGHTGREY);
+                break;
+              case 75:
+                drawIcon(150, 220, (uint8_t*)bat3_icon16x16, TFT_LIGHTGREY);
+                break;
+              case 100:
+                drawIcon(150, 220, (uint8_t*)plug_icon16x16, TFT_LIGHTGREY);
+                break;
+              case -1:
+                drawIcon(150, 220, (uint8_t*)plug_icon16x16, TFT_BLUE);
+                break;
+            }
+          }
+
 //                        delay(1000);
-                          M5.Lcd.fillRoundRect(120, 225, 80, 10, 0, TFT_BLACK);      // MASK RECTANGLE  (x, y, widht, height, corner)
-                          M5.Lcd.setFreeFont(FMB9);
-                          M5.Lcd.setTextColor(TFT_DARKGREY);
-                          M5.Lcd.setCursor(135, 235);
-                          M5.Lcd.setTextSize(1);
-                          M5.Lcd.print("");
-                          M5.Lcd.print(getBatteryLevel());
-                          M5.Lcd.print(" %");
-                        
-                        drawIcon(246, 220, (uint8_t*)powerbutton_icon16x16, TFT_DARKGREY);
-                        break;
+//                          M5.Lcd.fillRoundRect(120, 225, 80, 10, 0, TFT_BLACK);      // MASK RECTANGLE  (x, y, widht, height, corner)
+//                          M5.Lcd.setFreeFont(FMB9);
+//                          M5.Lcd.setTextColor(TFT_DARKGREY);
+//                          M5.Lcd.setCursor(135, 235);
+//                          M5.Lcd.setTextSize(1);
+//                          M5.Lcd.print("");
+//                          M5.Lcd.print(getBatteryLevel());
+//                          M5.Lcd.print(" %");
 
                         
-                      case 2: // loop + basal information
-                        strcpy(infoStr, "L: ");
-                        strlcat(infoStr, loopInfoStr, 64);
-                        M5.Lcd.drawString(infoStr, 0, 220, GFXFF);
-                        strcpy(infoStr, "B: ");
-                        strlcat(infoStr, basalInfoStr, 64);
-                        M5.Lcd.drawString(infoStr, 160, 220, GFXFF);
-                        break;
+
+                drawIcon(246, 220, (uint8_t*)powerbutton_icon16x16, TFT_LIGHTGREY);
+
+
+                      break;                        
+//                      case 2: // loop + basal information
+//                        strcpy(infoStr, "L: ");
+//                        strlcat(infoStr, loopInfoStr, 64);
+//                        M5.Lcd.drawString(infoStr, 0, 220, GFXFF);
+//                        strcpy(infoStr, "B: ");
+//                        strlcat(infoStr, basalInfoStr, 64);
+//                        M5.Lcd.drawString(infoStr, 160, 220, GFXFF);
+//                        break;
                     }
                   }
                 }
@@ -1195,7 +1242,11 @@ void loop(){
 
 
 
-  // SSID SECTION
+//            SSID SECTION
+
+
+
+
 
 
 //    delay(1000);
