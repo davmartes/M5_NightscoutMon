@@ -2,6 +2,9 @@
 ## M5Stack Nightscout monitor
 
 ###### M5Stack Nightscout monitor<br/>Copyright (C) 2018, 2019 Martin Lukasek <martin@lukasek.cz>
+
+CUSTOMIZED VERSION WITH BIGGER TIME AGO, DELTA, CLOCK. NO STARTUP MUSIC. NO BACKGROUND NOISE. SMALLER ARROW. SNOOZE BAR DIFFERENT LOCATION. 
+
 ###### This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 ###### This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 ###### You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>. 
